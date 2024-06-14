@@ -10,7 +10,7 @@
 
 ## Installation
 
-1. Clone the repository: `[[git clone https://github.com/your-username/quiz-management-system.git]]`
+1. Clone the repository: `[https://github.com/Jethreswar/Quiz-Application-Portal.git]`
 2. Navigate to the project directory: `cd quiz-management-system`
 3. Install the required dependencies: `pip install -r requirements.txt`
 4. Set up the database: `python manage.py migrate`
