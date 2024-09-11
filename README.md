@@ -1,4 +1,4 @@
-# Quiz-Application-Portal
+# Quiz-LMS-Generator
  This is a project for creating a Quiz Management System using Django framework in order to create, conduct, participate and manage student quizzes.
 
 ## Features
