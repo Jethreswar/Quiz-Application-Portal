@@ -1,0 +1,361 @@
+{% extends "base.html" %} 
+
+{% block content %}
+<div class="container mt-5">
+        <h1 class="mb-4 display-8">Welcome to the Admin Page, {{ username }}!</h1> 
+
+        <div class="text-right">
+            <a href="{% url 'logout' %}" class="btn btn-info">
+                <span class="glyphicon glyphicon-log-out"></span> Log out
+            </a>
+        </div> 
+        <br />
+        <!-- Add New User Form -->
+        <div class="card mb-4">
+            <div class="card-header" style="background-color: #00AA9E;">
+                <h2 class="display-10">Add New User</h2>
+            </div>
+            <div class="card-body">
+                <P class="lead font-italic">Fill in the course number only for students and professors who belong to single course. For multiple courses insert a (, ) between courses.</p>
+                <form method="post" action="{% url 'add_user' %}">
+                    {% csrf_token %}
+                    <div class="form-row">
+                        <div class="form-group col-md-3">
+                            <label for="new_username">Username:</label>
+                            <input type="text" class="form-control" id="new_username" name="new_username" required>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="new_password">Password:</label>
+                            <input type="password" class="form-control" id="new_password" name="new_password" required>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="new_user_course">Course:</label>
+                            <input type="text" class="form-control" id="new_user_course" name="new_user_course" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new_user_role">User Role:</label>
+                                <select class="form-control" id="new_user_role" name="new_user_role" required>
+                                    <option disabled selected value></option> 
+                                    <option value="user">User</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                        </div>
+                        <br />
+                        <div class="form-group">
+                            <label for="new_user_type">User Type:</label>
+                                <select class="form-control" id="new_user_type" name="new_user_type" required>
+                                    <option disabled selected value></option> 
+                                    <option value="student">Student</option>
+                                    <option value="professor">Professor</option>
+                                </select>
+                        </div>                       
+                        <button type="submit" class="btn btn-info">Add User</button>
+                    </div>    
+                </form>
+            </div>
+        </div>
+        
+        <!-- Line between sections -->
+        <hr class="my-4">
+
+        <!-- List of Existing Users with Delete Buttons -->
+        <div class="card mb-4">
+            <div class="card-header" style="background-color: #00AA9E;">
+                <h2 class="display-10">Existing Users</h2>
+            </div>
+            <div class="card-body">
+                <div class="container">
+                    <div class="row">
+                      <div class="col-12">
+                        <table class="table table-bordered">
+                          <thead>
+                            <tr>
+                              <th scope="col">User</th>
+                              <th scope="col">User Type</th>
+                              <th scope="col">Course</th>
+                              <th scope="col">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>
+                                    {{ user.username }}
+                                </td>    
+                                <td>
+                                    {{ user.user_type }}
+                                </td>  
+                                <td>
+                                    {{ user.courses }}
+                                </td> 
+                                {% csrf_token %} 
+                              <td>
+                                <a href="{% url 'delete_user' user_id=user.id %}">
+                                    <button type="button" class="btn btn-danger float-right">
+                                        <i class="far fa-trash-alt"></i>
+                                    </button>
+                                </a>
+                              </td>
+                            </tr>
+                            {% endfor %}                   
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                </div>
+            </div>  
+        </div>  
+
+        <hr class="my-4">
+        <div class="card mb-4">
+            <div class="card-header" style="background-color: #00AA9E;">
+                <h2>Create Quiz</h2>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'create_quiz' %}">
+                    {% csrf_token %}
+                    <div class="form-group mr-3">
+                        <label for="course_number">Choose a Course:</label>
+                        <select class="form-control" id="course_number" name="course_number">
+                            <option disabled selected value></option>
+                            {% for course in distinct_courses %}
+                                <option value="{{ course }}">{{ course }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>   
+                
+                    <div class="form-group mr-3">
+                        <label for="num_questions">Number of Questions:</label>
+                        <select class="form-control" id="num_questions" name="num_questions" required>
+                        <option disabled selected value></option>
+                            {% for question in num_questions_choices %}
+                            <option value="{{ question }}">{{ question }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group mr-3">
+                        <label for="quiz_duration">Quiz Duration (minutes):</label>
+                        <select class="form-control" id="quiz_duration" name="quiz_duration" required>
+                            <option disabled selected value></option>
+                            {% for duration in quiz_duration_choices %}
+                                <option value="{{ duration }}">{{ duration }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>    
+                        
+                    <div class="form-group mr-3">
+                        <label for="student_name">Select Student:</label>
+                        <select class="form-control" id="student_name" name="student_name" required>  
+                        <option disabled selected value></option>                     
+                            {% for student in users %}
+                                {% if student.user_type == 'student' %}
+                                   <option value="{{ student.id }}">{{ student.username }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group mr-3">    
+                        <label for="quiz_expire_date">Quiz Expiration Date:</label>
+                        <input type="date" id="quiz_expire_date" name="quiz_expire_date" required>
+                    </div>
+    
+                    <button type="submit" class="btn btn-info mt-3">Create Quiz</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Line between sections -->
+        <hr class="my-4">
+
+        <!-- List of Existing Users with Delete Buttons -->
+        <div class="card">
+            <div class="card-header" style="background-color: #00AA9E;">
+                <h2 class="display-10">Quizes</h2>
+            </div>
+            <div class="card-body">
+                <div class="container">
+                    <div class="row">
+                      <div class="col-12">
+                        <table class="table table-bordered">
+                          <thead>
+                            <tr>
+                              <th scope="col">Student</th>
+                              <th scope="col">Course</th>
+                              <th scope="col">Expire date</th>
+                              <th scope="col">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for quiz in quizzes %}
+                            <tr>
+                                <td>
+                                    {{ quiz.username }}
+                                </td>    
+                                <td>
+                                    {{ quiz.course }}
+                                </td>  
+                                <td>
+                                    {{ quiz.quiz_expire_date }}
+                                </td>  
+                                {% csrf_token %} 
+                              <td>
+                                <a href="{% url 'delete_quiz' quiz_id=quiz.id %}">
+                                    <button type="button" class="btn btn-danger float-right">
+                                        <i class="far fa-trash-alt"></i>
+                                    </button>
+                                </a>
+                              </td>
+                            </tr>
+                            {% endfor %}                   
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                </div>
+            </div>  
+        </div> 
+
+        <!-- Line between sections -->
+        <hr class="my-4">
+        <!-- List of Existing Users with Delete Buttons -->
+        <div class="card">
+            <div class="card-header" style="background-color: #00AA9E;">
+                <h2 class="display-10">Quiz History</h2>
+            </div>
+            <div class="card-body">
+                <div class="container">
+                    <div class="row">
+                      <div class="col-12">
+                        <table class="table table-bordered">
+                          <thead>
+                            <tr>
+                              <th scope="col">Student</th>
+                              <th scope="col">Course</th>
+                              <th scope="col">Quiz score</th>
+                              <th scope="col">Quiz date</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for history in all_quiz_history %}
+                            <tr>
+                                <td>
+                                    {{ history.username }}
+                                </td>    
+                                <td>
+                                    {{ history.course }}
+                                </td>  
+                                <td>
+                                    {{ history.score }}
+                                </td>  
+                                <td>
+                                    {{ history.quiz_date }}
+                                </td> 
+                            </tr>
+                            {% endfor %}                   
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                </div>
+            </div>  
+        </div> 
+
+        <!-- Line between sections -->
+        <hr class="my-4">
+
+        <div class="card mb-4">
+            <div class="card-header" style="background-color: #00AA9E;">
+                <h2 class="display-10">Add New Question</h2>
+            </div>
+            <div class="card-body">
+                <P class="lead font-italic">Add all 4 options for multiple choice question. Option 3 and Option 4 should be NA if it's a True/False question. </p>
+                    <form method="post" action="{% url 'admin_view' %}">
+                        {% csrf_token %}
+                        <div class="form-row">
+                            <div class="form-group col-md-3">
+                                <label for="new_question">Question:</label>
+                                <input type="text" class="form-control" id="new_question" name="new_question" required>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="new_option1">Option 1:</label>
+                                <input type="text" class="form-control" id="new_option1" name="new_option1" required>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="new_option2">Option 2:</label>
+                                <input type="text" class="form-control" id="new_option2" name="new_option2" required>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="new_option3">Option 3:</label>
+                                <input type="text" class="form-control" id="new_option3" name="new_option3" required>                                    
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="new_option4">Option 4:</label>
+                                <input type="text" class="form-control" id="new_option4" name="new_option4" required>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="new_correct_answer">Correct Answer:</label>
+                                <input type="text" class="form-control" id="new_correct_answer" name="new_correct_answer" required>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="new_course">Course:</label>
+                                <input type="text" class="form-control" id="new_course" name="new_course" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-info">Add New Question</button>
+                    </form>
+            </div> 
+        </div>       
+        <!-- Line between sections -->
+        <hr class="my-4">
+
+        <!-- List of Existing Users with Delete Buttons -->
+        <div class="card">
+            <div class="card-header" style="background-color: #00AA9E;">
+                <h2 class="display-10">Existing Questions</h2>
+            </div>
+            <div class="card-body">
+                <div class="container">
+                    <div class="row">
+                      <div class="col-12">
+                        <table class="table table-bordered">
+                          <thead>
+                            <tr>
+                              <th scope="col">Question</th>
+                              <th scope="col">Course</th>
+                              <th scope="col">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for question in questions %}
+                            <tr>
+                                <td>
+                                    {{ question.question }}
+                                </td>    
+                                <td>
+                                    {{ question.course }}
+                                </td>  
+                                {% csrf_token %} 
+                              <td>
+                                <a href="{% url 'modify_question' question_id=question.id %}">
+                                    <button type="button" class="btn btn-success float-right">
+                                      <i class="fas fa-edit"></i>
+                                    </button>
+                                </a>
+                                <a href="{% url 'delete_question' question_id=question.id %}">
+                                    <button type="button" class="btn btn-danger float-right">
+                                        <i class="far fa-trash-alt"></i>
+                                    </button>
+                                </a>
+                              </td>
+                            </tr>
+                            {% endfor %}                   
+                          </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>  
+        </div> 
+</div>
+{% endblock content %}
+

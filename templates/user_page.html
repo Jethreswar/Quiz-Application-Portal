@@ -1,0 +1,134 @@
+{% extends "base.html" %} 
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Welcome to your User Page, {{ username }}!</h2>
+
+    <div class="text-right">
+        <a href="{% url 'logout' %}" class="btn btn-info">
+            <span class="glyphicon glyphicon-log-out"></span> Log out
+        </a>
+    </div> 
+    <br />
+    <div class="card">
+        <div class="card-header" style="background-color: #00AA9E;">
+            <h2 class="display-10">Assigned Quiz</h2>
+        </div>
+        <div class="card-body">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th scope="col">Course</th>
+                            <th scope="col">Expire Date</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            {% for quiz in quizzes %}
+                            <tr>
+                                <td>
+                                    {{ quiz.course }}
+                                </td>    
+                                <td>
+                                    {{ quiz.quiz_expire_date }}
+                                </td>
+                                {% csrf_token %} 
+                              <td>
+                                <a href="{% url 'take_quiz' quiz_id=quiz.id %}">
+                                    <button type="button" class="btn btn-success float-right">
+                                      <i class="fas fa-edit"></i>
+                                    </button>
+                                </a>
+                              </td>
+                            </tr>
+                            {% endfor %}               
+                        </tbody>
+                    
+                    </table>
+                </div>
+            </div>
+        </div>  
+    </div>
+    <!-- Line between sections -->
+    <hr class="my-4">
+    <div class="card my-4">
+        <div class="card-header" style="background-color: #00AA9E;">
+            <h2 class="display-10">Quiz History</h2>
+        </div>
+        <div class="card-body">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th scope="col">Score</th>
+                            <th scope="col">Number of correct</th>
+                            <th scope="col">Number of wrong</th>
+                            <th scope="col">Quiz date</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            {% for history in quiz_history %}
+                            <tr>
+                                <td>
+                                    {{ history.score }}
+                                </td>    
+                                <td>
+                                    {{ history.num_correct }}
+                                </td>
+                                <td>
+                                    {{ history.num_wrong }}
+                                </td>    
+                                <td>
+                                    {{ history.quiz_date }}
+                                </td>
+                            </tr>
+                            {% endfor %}               
+                        </tbody>                   
+                    </table>
+                </div>
+                <div class="card-body">
+                    <!-- Add the canvas for the chart -->
+                    <canvas id="quizHistoryChart" width="400" height="200"></canvas>
+                 </div>
+            </div>
+        </div>   
+    </div> 
+</div>             
+<script>
+    // Fetch quiz history data from the Django view
+    var quizHistoryData = {{ quiz_history_data|safe }};
+
+    // Prepare data for the chart
+    var labels = quizHistoryData.dates;
+    var scores = quizHistoryData.scores;
+
+    // Create a line chart
+    var ctx = document.getElementById('quizHistoryChart').getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Quiz Scores',
+                data: scores,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1,
+                fill: false
+            }]
+        },
+        options: {
+            scales: {
+                x: [{
+                    type: 'linear',
+                    position: 'bottom'
+                }]
+            }
+        }
+    });
+</script>
+{% endblock content %}

@@ -1,0 +1,74 @@
+{% extends "base.html" %} 
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Quiz!</h2>
+    <div class="text-right">
+        <a href="{% url 'logout' %}" class="btn btn-info">
+            <span class="glyphicon glyphicon-log-out"></span> Log out
+        </a>
+    </div> 
+    <br />
+    <div class="card">
+        <div class="card-header" style="background-color: #00AA9E;">
+            <h2 class="display-10">Questions</h2>
+        </div>
+        <div class="card-body">
+            <div class="container">
+                <form id="quizForm" method="post" action="{% url 'submit_quiz' quiz_id_active=quiz_id %}">
+                    {% csrf_token %}
+                    <p>Remaining Time: <span id="timer"></span></p>
+                    <div>
+                        {% for question in quiz_questions %}
+                            <p>{{ forloop.counter }}. {{ question.question }}</p>
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <input type="radio" name="answer_{{ question.id }}" value="{{ question.option1 }}" required> 
+                                    {{ question.option1 }}
+                                </li>
+                                <li class="list-group-item">
+                                    <input type="radio" name="answer_{{ question.id }}" value="{{ question.option2 }}" required> 
+                                    {{ question.option2 }}
+                                </li>
+                                {% if question.option3 != "NA" %}
+                                    <li class="list-group-item">
+                                        <input type="radio" name="answer_{{ question.id }}" value="{{ question.option3 }}" required> 
+                                        {{ question.option3 }}
+                                    </li>
+                                <li class="list-group-item">
+                                    <input type="radio" name="answer_{{ question.id }}" value="{{ question.option4 }}" required> 
+                                    {{ question.option4 }}
+                                </li>  
+                                {% endif %}
+                            </ul>
+                            <br />
+                        {% endfor %}
+                    </div>
+                    <br />
+                    <button type="submit" class="btn btn-info">Submit</button>
+                    <a href="{% url 'user_view' %}" class="btn btn-danger">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>  
+</div>              
+<script>
+    const timerElement = document.getElementById('timer');
+    const durationInMinutes = {{ quiz_duration }};
+    let timer = durationInMinutes * 60;  // Convert minutes to seconds
+
+    setInterval(() => {
+        const minutes = Math.floor(timer / 60);
+        const seconds = timer % 60;
+        timerElement.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+        if (timer <= 30) {
+            timerElement.classList.add('red-blink');
+        }
+
+        if (--timer < 0) {
+            document.getElementById('quizForm').submit();  // Automatically submit the form when the timer reaches zero
+        }
+    }, 1000);
+</script>
+{% endblock content %}
